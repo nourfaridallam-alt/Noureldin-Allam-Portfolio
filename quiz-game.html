@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Game - Noureldin Allam</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark: #0a0a0a;
+            --dark-secondary: #1a1a1a;
+            --dark-card: #242424;
+            --text: #ffffff;
+            --text-dim: #a0a0a0;
+            --accent: #f5f5f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        .cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--text);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transition: all 0.1s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--text);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.5;
+        }
+
+        nav,
+        .hero,
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        nav {
+            background: var(--dark-secondary);
+            padding: 1.5rem 4rem;
+            border-bottom: 1px solid var(--dark-card);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+        .nav-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .hero {
+            padding: 4rem 4rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-dim);
+        }
+
+        .tags {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 0.5rem 1rem;
+            background: var(--dark-card);
+            border: 1px solid var(--dark-secondary);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 4rem 4rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .section {
+            background: var(--dark-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--dark-card);
+        }
+
+        .section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+            color: var(--text);
+        }
+
+        .section p {
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .section ul,
+        .section ol {
+            color: var(--text-dim);
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .section li {
+            padding: 0.5rem 0;
+            line-height: 1.8;
+        }
+
+        .code-block {
+            background: var(--dark);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--dark-card);
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: var(--text-dim);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .code-block code {
+            color: var(--text);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar-section {
+            background: var(--dark-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--dark-card);
+        }
+
+        .sidebar-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .tech-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .tech-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .tech-icon {
+            font-size: 1.5rem;
+        }
+
+        .link-button {
+            display: block;
+            padding: 1rem;
+            background: var(--text);
+            color: var(--dark);
+            text-decoration: none;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .link-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .link-button.secondary {
+            background: transparent;
+            border: 2px solid var(--text);
+            color: var(--text);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .feature-card {
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--dark-secondary);
+        }
+
+        .feature-card h4 {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .quiz-mockup {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .quiz-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-question p {
+            color: white;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .quiz-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .quiz-score {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .flow-diagram {
+            background: var(--dark);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--dark-card);
+            margin: 1rem 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--dark-card);
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .flow-step-number {
+            background: #667eea;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .flow-step-content {
+            flex: 1;
+        }
+
+        .flow-step-content h4 {
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .flow-step-content p {
+            color: var(--text-dim);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table {
+            background: var(--dark);
+            border-radius: 8px;
+            border: 1px solid var(--dark-card);
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th {
+            background: var(--dark-card);
+            color: var(--text);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            color: var(--text-dim);
+            border-top: 1px solid var(--dark-card);
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        @media (max-width: 968px) {
+            body {
+                cursor: default;
+            }
+
+            .cursor,
+            .cursor-trail {
+                display: none;
+            }
+
+            nav {
+                padding: 1rem 2rem;
+            }
+
+            .hero,
+            .content {
+                padding: 2rem;
+            }
+
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cursor"></div>
+    <canvas id="bg-canvas"></canvas>
+
+    <nav>
+        <div class="nav-container">
+            <a href="mywebsite.html" class="back-link">
+                ← Back to Portfolio
+            </a>
+            <div class="nav-title">Quiz Game</div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>❓ Computer Quiz Game</h1>
+        <div class="project-meta">
+            <div class="meta-item">
+                <span>📅</span>
+                <span>2024</span>
+            </div>
+            <div class="meta-item">
+                <span>💻</span>
+                <span>Python</span>
+            </div>
+            <div class="meta-item">
+                <span>⚡</span>
+                <span>Console Application</span>
+            </div>
+        </div>
+        <div class="tags">
+            <span class="tag">Python</span>
+            <span class="tag">Conditional Logic</span>
+            <span class="tag">String Methods</span>
+            <span class="tag">Score Tracking</span>
+            <span class="tag">User Input</span>
+            <span class="tag">Type Conversion</span>
+        </div>
+    </section>
+
+    <div class="content">
+        <div class="main-content">
+            <div class="section">
+                <h2>Project Overview</h2>
+                <p>An interactive computer hardware quiz game that tests users' knowledge about common computer
+                    components and their acronyms. The game presents five questions about CPU, GPU, RAM, PSU, and
+                    includes a fun bonus question, tracking the user's score throughout and providing a final
+                    percentage.</p>
+                <p>This project demonstrates fundamental programming concepts including conditional statements, string
+                    manipulation with the lower() method, score tracking with incremental operators, type conversion,
+                    and basic user interaction through console input/output.</p>
+
+                <div class="quiz-mockup">
+                    <div class="quiz-header">🖥️ Computer Quiz!</div>
+                    <div class="quiz-question">
+                        <p>What does CPU stand for?</p>
+                        <input type="text" class="quiz-input" placeholder="Your answer..." readonly>
+                    </div>
+                    <div class="quiz-question">
+                        <p>What does GPU stand for?</p>
+                        <input type="text" class="quiz-input" placeholder="Your answer..." readonly>
+                    </div>
+                    <div class="quiz-score">
+                        Score: 4/5 (80%)
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Key Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>❓ Multiple Questions</h4>
+                        <p>Five trivia questions testing computer hardware knowledge</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📊 Score Tracking</h4>
+                        <p>Real-time score updates with increment and decrement</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔤 Case-Insensitive Input</h4>
+                        <p>Accepts answers regardless of capitalization using lower() method</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>💬 Feedback Messages</h4>
+                        <p>Immediate response after each answer with encouraging or humorous messages</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📈 Percentage Calculation</h4>
+                        <p>Converts final score to percentage for easy understanding</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🚪 Opt-Out Option</h4>
+                        <p>Players can choose not to play at the start</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Technical Implementation</h2>
+
+                <h3>Program Flow</h3>
+                <p>The quiz follows a linear execution pattern with conditional branching at each question. The program
+                    begins with a welcome prompt and opt-in check, then proceeds through five sequential questions.</p>
+
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="flow-step-number">1</div>
+                        <div class="flow-step-content">
+                            <h4>Welcome & Opt-In</h4>
+                            <p>Display welcome message and check if user wants to play</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-step-number">2</div>
+                        <div class="flow-step-content">
+                            <h4>Ask Question</h4>
+                            <p>Present question and capture user input</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-step-number">3</div>
+                        <div class="flow-step-content">
+                            <h4>Check Answer</h4>
+                            <p>Compare answer (case-insensitive) to correct response</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-step-number">4</div>
+                        <div class="flow-step-content">
+                            <h4>Update Score</h4>
+                            <p>Increment score for correct answer, decrement for wrong</p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-step-number">5</div>
+                        <div class="flow-step-content">
+                            <h4>Display Results</h4>
+                            <p>Show final score as both raw number and percentage</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Score Management System</h3>
+                <p>The score tracking system uses a simple integer variable that starts at 0. The += operator adds 1
+                    point for correct answers, while the -= operator (used in question 1) subtracts 1 for incorrect
+                    answers.</p>
+
+                <div class="code-block">
+                    <pre><code>score = 0
+
+# For correct answers
+if answer.lower() == "central processing unit":
+    print("Great Job! lets continue :)")
+    score += 1
+else:
+    print(" Whomp Whomp!! YOU SUCK")
+    score -= 1</code></pre>
+                </div>
+
+                <h3>Case-Insensitive Answer Checking</h3>
+                <p>The program uses the .lower() string method to convert user input to lowercase before comparison.
+                    This ensures that "CPU", "cpu", and "Cpu" are all treated identically, improving user experience by
+                    accepting various input formats.</p>
+
+                <div class="code-block">
+                    <pre><code>answer = input(" what does CPU stand for? ")
+
+if answer.lower() == "central processing unit":
+    # Answer is correct
+    score += 1</code></pre>
+                </div>
+
+                <h3>Percentage Calculation</h3>
+                <p>The final score is converted to a percentage using division and multiplication. The score is divided
+                    by the total number of questions (5), then multiplied by 100. Type conversion with float() ensures
+                    decimal precision, and str() converts the result for string concatenation.</p>
+
+                <div class="code-block">
+                    <pre><code>print("You got " + str(score) + " questions correct!!")
+print("You got " + str(float(score/5) * 100) + "%")</code></pre>
+                </div>
+
+                <h3>Early Exit Implementation</h3>
+                <p>The program checks if the user wants to play at the start. If they respond with anything other than
+                    "yes", the quit() function terminates the program immediately, preventing unnecessary resource
+                    usage.</p>
+
+                <div class="code-block">
+                    <pre><code>playing = input("Do you want to play? ")
+
+if playing.lower() != "yes":
+    quit()
+else:
+    print(" Okay! let play :)")</code></pre>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Code Analysis & Improvements</h2>
+
+                <h3>Current Implementation Strengths</h3>
+                <ul>
+                    <li><strong>User-Friendly:</strong> Case-insensitive input handling improves accessibility</li>
+                    <li><strong>Immediate Feedback:</strong> Users receive instant confirmation after each answer</li>
+                    <li><strong>Score Visibility:</strong> Both raw score and percentage provide clear performance
+                        metrics</li>
+                    <li><strong>Simple Logic:</strong> Straightforward conditional statements make the code easy to
+                        understand</li>
+                </ul>
+
+                <h3>Areas for Enhancement</h3>
+
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Current Implementation</th>
+                                <th>Potential Improvement</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Repetitive if-else blocks</td>
+                                <td>Use lists/dictionaries for questions and answers</td>
+                            </tr>
+                            <tr>
+                                <td>Hardcoded questions in code</td>
+                                <td>Store questions in data structure for easy modification</td>
+                            </tr>
+                            <tr>
+                                <td>String concatenation with +</td>
+                                <td>Use f-strings for cleaner string formatting</td>
+                            </tr>
+                            <tr>
+                                <td>Fixed question order</td>
+                                <td>Randomize question sequence for replayability</td>
+                            </tr>
+                            <tr>
+                                <td>Inconsistent score modification</td>
+                                <td>Only question 1 uses score -= 1, others don't</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Refactored Version with Data Structures</h3>
+                <p>A more maintainable approach would use a dictionary to store questions and answers, with a loop to
+                    iterate through them. This eliminates code repetition and makes adding new questions trivial.</p>
+
+                <div class="code-block">
+                    <pre><code>questions = {
+    "What does CPU stand for?": "central processing unit",
+    "What does GPU stand for?": "graphics processing unit",
+    "What does RAM stand for?": "random access memory",
+    "What does PSU stand for?": "power supply",
+    "Is water wet?": "yes"
+}
+
+score = 0
+
+for question, correct_answer in questions.items():
+    answer = input(question + " ").lower()
+    
+    if answer == correct_answer:
+        print("Great Job! lets continue :)")
+        score += 1
+    else:
+        print("Whomp Whomp!! YOU SUCK")
+
+print(f"You got {score} questions correct!!")
+print(f"You got {(score/len(questions)) * 100}%")</code></pre>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Challenges & Solutions</h2>
+
+                <h3>Challenge 1: Case Sensitivity</h3>
+                <p><strong>Problem:</strong> Users might type answers in various capitalizations (CPU, cpu, Cpu),
+                    causing incorrect rejection of valid answers.</p>
+                <p><strong>Solution:</strong> Applied the .lower() method to all user inputs before comparison:
+                    <code>if answer.lower() == "central processing unit"</code>. This normalizes all input to lowercase
+                    for consistent checking.</p>
+
+                <h3>Challenge 2: Score Display Formatting</h3>
+                <p><strong>Problem:</strong> Needed to combine score integer with text strings and convert score to
+                    percentage.</p>
+                <p><strong>Solution:</strong> Used str() to convert the integer score to string for concatenation, and
+                    float() to ensure decimal division: <code>str(float(score/5) * 100)</code>. This produces accurate
+                    percentage calculations.</p>
+
+                <h3>Challenge 3: Inconsistent Score Tracking</h3>
+                <p><strong>Problem:</strong> First question decrements score for wrong answers, but remaining questions
+                    don't, creating inconsistent behavior.</p>
+                <p><strong>Solution:</strong> This is a bug in the current implementation. Should either remove score
+                    decrement from question 1, or add it to all questions for consistency. Recommended approach: only
+                    increment for correct answers, ignore incorrect answers.</p>
+
+                <h3>Challenge 4: User Experience on Wrong Answers</h3>
+                <p><strong>Problem:</strong> The "YOU SUCK" message might be discouraging for some users, especially
+                    younger players.</p>
+                <p><strong>Solution:</strong> Consider alternative feedback messages like "Not quite, try the next one!"
+                    or make the tone configurable based on player preference (casual/serious/educational modes).</p>
+            </div>
+
+            <div class="section">
+                <h2>What I Learned</h2>
+                <ul>
+                    <li><strong>Conditional Statements:</strong> Using if-else blocks to control program flow based on
+                        conditions</li>
+                    <li><strong>String Methods:</strong> Applying .lower() for case-insensitive string comparisons</li>
+                    <li><strong>Variable Manipulation:</strong> Using += and -= operators for score tracking</li>
+                    <li><strong>Type Conversion:</strong> Converting between int, float, and str types for calculations
+                        and display</li>
+                    <li><strong>Input Validation:</strong> Checking user input and handling different response
+                        variations</li>
+                    <li><strong>Program Termination:</strong> Using quit() to exit the program early when needed</li>
+                    <li><strong>Mathematical Operations:</strong> Performing division and multiplication for percentage
+                        calculations</li>
+                    <li><strong>User Interaction:</strong> Creating engaging console-based interactions with prompts and
+                        feedback</li>
+                    <li><strong>Code Organization:</strong> Structuring a program with clear sections for each question
+                    </li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Potential Enhancements</h2>
+                <ul>
+                    <li><strong>Question Bank:</strong> Store questions in a list or dictionary for easier management
+                    </li>
+                    <li><strong>Random Question Order:</strong> Shuffle questions for different experience each
+                        playthrough</li>
+                    <li><strong>Difficulty Levels:</strong> Easy, Medium, Hard categories with different question sets
+                    </li>
+                    <li><strong>Multiple Choice:</strong> Provide answer options instead of free text input</li>
+                    <li><strong>Timer Feature:</strong> Add time limit for each question to increase challenge</li>
+                    <li><strong>Hint System:</strong> Allow players to request hints (with point penalty)</li>
+                    <li><strong>High Score Tracking:</strong> Save best scores to a file for persistent leaderboard</li>
+                    <li><strong>Category Selection:</strong> Let users choose between hardware, software, networking,
+                        etc.</li>
+                    <li><strong>Lives System:</strong> Three strikes before game over instead of continuing through all
+                        questions</li>
+                    <li><strong>Answer Feedback:</strong> Show correct answer when user gets it wrong for educational
+                        value</li>
+                    <li><strong>Replay Option:</strong> Loop to allow multiple quiz attempts without restarting program
+                    </li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Complete Source Code</h2>
+                <div class="code-block">
+                    <pre><code>print(" Welcome to my computer quiz! ")
+
+playing = input("Do you want to play? ")
+
+if playing.lower() != "yes":
+    quit()
+else:
+    print(" Okay! let play :)")
+score = 0
+
+# QUESTION 1
+answer = input(" what does CPU stand for? ")
+
+if answer.lower() == "central processing unit":
+    print("Great Job! lets continue :)")
+    score += 1
+else:
+    print(" Whomp Whomp!! YOU SUCK")
+    score -= 1
+
+# QUESTION 2
+answer = input(" What does GPU stand for? ")
+
+if answer.lower() == "graphics processing unit":
+    print("Great Job! lets continue :)")
+    score += 1
+else:
+    print(" Whomp Whomp!! YOU SUCK")
+
+# QUESTION 3
+answer = input(" what does RAM stand for? ")
+
+if answer.lower() == "random access memory":
+    print("Great Job! lets continue :)")
+    score += 1
+else:
+    print(" Whomp Whomp!! YOU SUCK")
+
+# QUESTION 4
+answer = input(" What does PSU stand for? ")
+
+if answer.lower() == "power supply":
+    print("Great Job! lets continue :)")
+    score += 1
+else:
+    print(" Whomp Whomp!! YOU SUCK")
+
+# QUESTION 5
+answer = input(" Is water wet? ")
+
+if answer.lower() == "yes":
+    print("Great Job! All DONE :)")
+    score += 1
+else:
+    print(" Whomp Whomp!! YOU SUCK")
+
+print("You got " + str(score) + " questions correct!!")
+print("You got " + str(float(score/5) * 100) + "%")</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>Technologies Used</h3>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <span class="tech-icon">🐍</span>
+                        <span>Python 3.x</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">🔤</span>
+                        <span>String Methods</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">❓</span>
+                        <span>Conditional Logic</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">🔢</span>
+                        <span>Type Conversion</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">⌨️</span>
+                        <span>User Input</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Programming Concepts</h3>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <span>✅</span>
+                        <span>If-Else Statements</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>➕</span>
+                        <span>Score Tracking</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>🔄</span>
+                        <span>Variable Updates</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>📝</span>
+                        <span>Input Validation</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Project Links</h3>
+                <a href="#" class="link-button">View on GitHub</a>
+                <a href="#" class="link-button secondary">Download Code</a>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Project Stats</h3>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <span>📊</span>
+                        <span>~50 Lines of Code</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>⏱️</span>
+                        <span>Development: 1.5 hours</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>🎯</span>
+                        <span>Difficulty: Beginner</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>❓</span>
+                        <span>5 Questions</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Related Projects</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 1rem;">
+                        <a href="typing-game.html" style="color: var(--text-dim); text-decoration: none;">
+                            ⌨️ Typing Speed Game →
+                        </a>
+                    </li>
+                    <li style="margin-bottom: 1rem;">
+                        <a href="timed-math-challenge.html" style="color: var(--text-dim); text-decoration: none;">
+                            ⏱️ Timed Math Challenge →
+                        </a>
+                    </li>
+                    <li>
+                        <a href="number-guesser.html" style="color: var(--text-dim); text-decoration: none;">
+                            🎲 Number Guessing Game →
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 280;
+        let time = 0;
+
+        class Particle {
+            constructor() {
+                this.baseX = Math.random() * canvas.width;
+                this.baseY = Math.random() * canvas.height;
+                this.x = this.baseX;
+                this.y = this.baseY;
+                this.size = Math.random() * 0.8 + 0.3;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.6 + 0.2;
+                this.offset = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                this.x = this.baseX + Math.sin(time + this.offset) * 30;
+                this.y = this.baseY + Math.cos(time + this.offset) * 30;
+                this.baseX += this.speedX;
+                this.baseY += this.speedY;
+
+                if (this.baseX < -50) this.baseX = canvas.width + 50;
+                if (this.baseX > canvas.width + 50) this.baseX = -50;
+                if (this.baseY < -50) this.baseY = canvas.height + 50;
+                if (this.baseY > canvas.height + 50) this.baseY = -50;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(200, 200, 255, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateBackground() {
+            time += 0.02;
+
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#0a0a0a');
+            gradient.addColorStop(0.5, '#1a1a2e');
+            gradient.addColorStop(1, '#0a0a0a');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animateBackground);
+        }
+
+        animateBackground();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        const cursor = document.querySelector('.cursor');
+        const trails = [];
+        const trailLength = 20;
+
+        for (let i = 0; i < trailLength; i++) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            document.body.appendChild(trail);
+            trails.push({
+                element: trail,
+                x: 0,
+                y: 0
+            });
+        }
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let cursorX = 0;
+        let cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.4;
+            cursorY += (mouseY - cursorY) * 0.4;
+
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+
+            trails.forEach((trail, index) => {
+                const nextTrail = trails[index - 1] || { x: cursorX, y: cursorY };
+
+                trail.x += (nextTrail.x - trail.x) * 0.5;
+                trail.y += (nextTrail.y - trail.y) * 0.5;
+
+                trail.element.style.left = trail.x + 'px';
+                trail.element.style.top = trail.y + 'px';
+                trail.element.style.opacity = (trailLength - index) / trailLength * 0.5;
+                trail.element.style.transform = `scale(${(trailLength - index) / trailLength})`;
+            });
+
+            requestAnimationFrame(animateCursor);
+        }
+
+        animateCursor();
+
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(1.5)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+
+</html>

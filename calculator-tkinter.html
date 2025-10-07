@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator with Tkinter - Noureldin Allam</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark: #0a0a0a;
+            --dark-secondary: #1a1a1a;
+            --dark-card: #242424;
+            --text: #ffffff;
+            --text-dim: #a0a0a0;
+            --accent: #f5f5f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        .cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--text);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transition: all 0.1s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--text);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.5;
+        }
+
+        nav,
+        .hero,
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        nav {
+            background: var(--dark-secondary);
+            padding: 1.5rem 4rem;
+            border-bottom: 1px solid var(--dark-card);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+        .nav-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .hero {
+            padding: 4rem 4rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-dim);
+        }
+
+        .tags {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 0.5rem 1rem;
+            background: var(--dark-card);
+            border: 1px solid var(--dark-secondary);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 4rem 4rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .section {
+            background: var(--dark-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--dark-card);
+        }
+
+        .section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+            color: var(--text);
+        }
+
+        .section p {
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .section ul,
+        .section ol {
+            color: var(--text-dim);
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .section li {
+            padding: 0.5rem 0;
+            line-height: 1.8;
+        }
+
+        .code-block {
+            background: var(--dark);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--dark-card);
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: var(--text-dim);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .code-block code {
+            color: var(--text);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar-section {
+            background: var(--dark-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--dark-card);
+        }
+
+        .sidebar-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .tech-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .tech-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .tech-icon {
+            font-size: 1.5rem;
+        }
+
+        .link-button {
+            display: block;
+            padding: 1rem;
+            background: var(--text);
+            color: var(--dark);
+            text-decoration: none;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .link-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .link-button.secondary {
+            background: transparent;
+            border: 2px solid var(--text);
+            color: var(--text);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .feature-card {
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--dark-secondary);
+        }
+
+        .feature-card h4 {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .calculator-mockup {
+            background: linear-gradient(135deg, #5f9ea0, #b0e0e6);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .calc-display {
+            background: white;
+            color: black;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: right;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calc-btn {
+            background: #b0e0e6;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .oop-diagram {
+            background: var(--dark);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--dark-card);
+            margin: 1rem 0;
+        }
+
+        .class-box {
+            background: var(--dark-card);
+            border: 2px solid #4ade80;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .class-header {
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .class-section {
+            margin: 0.75rem 0;
+            padding: 0.5rem;
+            border-left: 3px solid #4ade80;
+            padding-left: 1rem;
+        }
+
+        .class-section h4 {
+            color: var(--text);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .class-section p {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin: 0.25rem 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        @media (max-width: 968px) {
+            body {
+                cursor: default;
+            }
+
+            .cursor,
+            .cursor-trail {
+                display: none;
+            }
+
+            nav {
+                padding: 1rem 2rem;
+            }
+
+            .hero,
+            .content {
+                padding: 2rem;
+            }
+
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: -1;
+            }
+
+            .calc-buttons {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.25rem;
+            }
+
+            .calc-btn {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cursor"></div>
+    <canvas id="bg-canvas"></canvas>
+
+    <nav>
+        <div class="nav-container">
+            <a href="mywebsite.html" class="back-link">
+                ← Back to Portfolio
+            </a>
+            <div class="nav-title">Calculator with Tkinter</div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>🔢 Calculator with Tkinter GUI</h1>
+        <div class="project-meta">
+            <div class="meta-item">
+                <span>📅</span>
+                <span>2024</span>
+            </div>
+            <div class="meta-item">
+                <span>💻</span>
+                <span>Python</span>
+            </div>
+            <div class="meta-item">
+                <span>⚡</span>
+                <span>Desktop Application</span>
+            </div>
+        </div>
+        <div class="tags">
+            <span class="tag">Python</span>
+            <span class="tag">Tkinter</span>
+            <span class="tag">GUI Development</span>
+            <span class="tag">OOP</span>
+            <span class="tag">Event-Driven Programming</span>
+            <span class="tag">Widget Design</span>
+        </div>
+    </section>
+
+    <div class="content">
+        <div class="main-content">
+            <div class="section">
+                <h2>Project Overview</h2>
+                <p>A fully functional desktop calculator application built with Python's Tkinter library. The calculator
+                    features a clean, user-friendly graphical interface with a complete button layout supporting basic
+                    arithmetic operations, memory functions, and error handling.</p>
+                <p>This project demonstrates mastery of GUI programming concepts including widget management, event
+                    handling, object-oriented design patterns, and the MVC (Model-View-Controller) architecture. The
+                    calculator provides an intuitive user experience with visual feedback and robust calculation
+                    capabilities.</p>
+
+                <div class="calculator-mockup">
+                    <div class="calc-display">1234567890</div>
+                    <div class="calc-buttons">
+                        <div class="calc-btn">&lt;-</div>
+                        <div class="calc-btn">CE</div>
+                        <div class="calc-btn">C</div>
+                        <div class="calc-btn">+/-</div>
+                        <div class="calc-btn">7</div>
+                        <div class="calc-btn">8</div>
+                        <div class="calc-btn">9</div>
+                        <div class="calc-btn">+</div>
+                        <div class="calc-btn">4</div>
+                        <div class="calc-btn">5</div>
+                        <div class="calc-btn">6</div>
+                        <div class="calc-btn">-</div>
+                        <div class="calc-btn">1</div>
+                        <div class="calc-btn">2</div>
+                        <div class="calc-btn">3</div>
+                        <div class="calc-btn">*</div>
+                        <div class="calc-btn">0</div>
+                        <div class="calc-btn">.</div>
+                        <div class="calc-btn">=</div>
+                        <div class="calc-btn">/</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Key Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🖥️ Graphical Interface</h4>
+                        <p>Professional GUI with custom colors and styling for enhanced user experience</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔢 Basic Operations</h4>
+                        <p>Addition, subtraction, multiplication, and division functionality</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>⬅️ Backspace Function</h4>
+                        <p>Delete last character for easy error correction</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔄 Clear Functions</h4>
+                        <p>CE (Clear Entry) and C (Clear All) for input management</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>➕➖ Sign Toggle</h4>
+                        <p>Quick positive/negative conversion with +/- button</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>⚠️ Error Handling</h4>
+                        <p>Graceful handling of invalid operations and division by zero</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🎨 Custom Styling</h4>
+                        <p>Cadet blue theme with powder blue accents for visual appeal</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📱 Responsive Layout</h4>
+                        <p>Grid-based design that maintains structure at fixed window size</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Technical Implementation</h2>
+
+                <h3>Object-Oriented Architecture</h3>
+                <p>The calculator is built using object-oriented programming principles, encapsulating all functionality
+                    within a Calculator class. This design promotes code organization, reusability, and maintainability.
+                </p>
+
+                <div class="oop-diagram">
+                    <div class="class-box">
+                        <div class="class-header">Calculator Class</div>
+                        <div class="class-section">
+                            <h4>Attributes:</h4>
+                            <p>• root: Main Tk window instance</p>
+                            <p>• MainFrame: Outer frame container</p>
+                            <p>• WidgetFrame: Inner frame for widgets</p>
+                            <p>• lblDisplay: Label widget for display</p>
+                            <p>• input_button: String to store calculation</p>
+                        </div>
+                        <div class="class-section">
+                            <h4>Methods:</h4>
+                            <p>• __init__(): Constructor - initializes GUI</p>
+                            <p>• create_button(): Factory method for buttons</p>
+                            <p>• button_click(): Event handler for all buttons</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>GUI Layout Design</h3>
+                <p>The interface uses a nested frame structure with Tkinter's grid geometry manager for precise widget
+                    placement. The layout consists of a display area at the top and a 5x4 button grid below.</p>
+
+                <div class="code-block">
+                    <pre><code>def __init__(self, root):
+    self.root = root
+    self.root.title("Calculator")
+    self.root.geometry("615x690+400+200")
+    self.root.configure(bg='cadet blue')
+    
+    # Create nested frame structure
+    self.MainFrame = Frame(self.root, bd=18, width=600,
+                          height=670, relief=RIDGE, bg='powder blue')
+    self.MainFrame.grid()
+    
+    self.WidgetFrame = Frame(self.MainFrame, bd=18, width=590,
+                            height=660, relief=RIDGE, bg='cadet blue')
+    self.WidgetFrame.grid()
+    
+    # Display label
+    self.lblDisplay = Label(self.WidgetFrame, width=30, height=2,
+                           bg='white', fg='black',
+                           font=('Arial', 20, 'bold'), anchor='e')
+    self.lblDisplay.grid(row=0, column=0, columnspan=4,
+                        padx=10, pady=10)</code></pre>
+                </div>
+
+                <h3>Dynamic Button Creation</h3>
+                <p>The create_button method demonstrates the factory pattern, generating buttons with consistent styling
+                    but different labels and positions. Lambda functions bind each button to its specific action.</p>
+
+                <div class="code-block">
+                    <pre><code>def create_button(self, text, row, column):
+    btnWidget = Button(
+        self.WidgetFrame,
+        text=text,
+        width=6,
+        height=2,
+        bd=4,
+        bg='powder blue',
+        font=('Arial', 20, 'bold'),
+        command=lambda: self.button_click(text)
+    )
+    btnWidget.grid(row=row, column=column, padx=5, pady=5)</code></pre>
+                </div>
+
+                <h3>Event Handling Logic</h3>
+                <p>The button_click method serves as the central event handler, processing all button inputs through
+                    conditional logic. It manages different operations including backspace, clear, calculation, and sign
+                    toggling.</p>
+
+                <div class="code-block">
+                    <pre><code>def button_click(self, text):
+    if text == "<-":
+        self.input_button = self.input_button[:-1]
+    elif text == "CE":
+        self.input_button = ""
+    elif text == "C":
+        self.input_button = ""
+    elif text == "=":
+        try:
+            self.input_button = str(eval(self.input_button))
+        except:
+            self.input_button = "Error"
+    elif text == "+/-":
+        self.input_button = str(-float(self.input_button))
+    else:
+        self.input_button += text
+    
+    self.lblDisplay.config(text=self.input_button)</code></pre>
+                </div>
+
+                <h3>Expression Evaluation</h3>
+                <p>The calculator uses Python's built-in eval() function to parse and evaluate mathematical expressions.
+                    While convenient, this is wrapped in a try-except block to handle invalid inputs gracefully.</p>
+            </div>
+
+            <div class="section">
+                <h2>Tkinter Components Used</h2>
+
+                <h3>Tk() - Main Window</h3>
+                <p>The root window serves as the application container. Configuration methods set the window title,
+                    size, position, and background color.</p>
+
+                <h3>Frame Widgets</h3>
+                <p>Frames provide container functionality, organizing widgets hierarchically. The RIDGE relief style
+                    creates a 3D border effect for visual depth.</p>
+
+                <h3>Label Widget</h3>
+                <p>The display uses a Label widget configured with right-aligned text (anchor='e'), creating a
+                    calculator-style display that shows expressions and results.</p>
+
+                <h3>Button Widgets</h3>
+                <p>Buttons handle user interaction with command callbacks. Each button is styled consistently and uses
+                    lambda functions for event binding.</p>
+
+                <h3>Grid Geometry Manager</h3>
+                <p>The grid() method positions widgets in rows and columns, enabling precise control over layout.
+                    Parameters like padx, pady, and columnspan fine-tune positioning.</p>
+            </div>
+
+            <div class="section">
+                <h2>Challenges & Solutions</h2>
+
+                <h3>Challenge 1: Button Event Binding</h3>
+                <p><strong>Problem:</strong> Each button needed to pass its specific text value to the event handler
+                    when clicked.</p>
+                <p><strong>Solution:</strong> Used lambda functions in the command parameter:
+                    <code>command=lambda: self.button_click(text)</code>. This creates a closure capturing the button's
+                    text value for each instance.</p>
+
+                <h3>Challenge 2: Display Updating</h3>
+                <p><strong>Problem:</strong> The display needed to update after every button click to show the current
+                    expression.</p>
+                <p><strong>Solution:</strong> Used the Label's config() method to update the text property:
+                    <code>self.lblDisplay.config(text=self.input_button)</code>, ensuring real-time feedback.</p>
+
+                <h3>Challenge 3: Sign Toggle Implementation</h3>
+                <p><strong>Problem:</strong> The +/- button needed to negate the current number without affecting the
+                    entire expression.</p>
+                <p><strong>Solution:</strong> Converted the input to float, negated it, then converted back to string:
+                    <code>str(-float(self.input_button))</code>. This preserves the numeric value while changing its
+                    sign.</p>
+
+                <h3>Challenge 4: Error Handling for Invalid Input</h3>
+                <p><strong>Problem:</strong> Users could create invalid expressions (like "5++3") that would crash the
+                    calculator.</p>
+                <p><strong>Solution:</strong> Wrapped eval() in a try-except block. On error, display "Error" instead of
+                    crashing, maintaining user experience continuity.</p>
+
+                <h3>Challenge 5: Window Sizing and Layout</h3>
+                <p><strong>Problem:</strong> Ensuring the calculator maintained proper proportions and all buttons were
+                    visible.</p>
+                <p><strong>Solution:</strong> Set fixed geometry with <code>geometry("615x690+400+200")</code>,
+                    specifying width, height, and screen position. Used consistent padding values for uniform spacing.
+                </p>
+            </div>
+
+            <div class="section">
+                <h2>What I Learned</h2>
+                <ul>
+                    <li><strong>Tkinter GUI Development:</strong> Mastered creating desktop applications with Python's
+                        standard GUI library</li>
+                    <li><strong>Object-Oriented Design:</strong> Implemented class-based architecture for code
+                        organization</li>
+                    <li><strong>Event-Driven Programming:</strong> Understanding of callback functions and event
+                        handling</li>
+                    <li><strong>Widget Management:</strong> Experience with Frame, Label, and Button widgets</li>
+                    <li><strong>Grid Geometry Manager:</strong> Precise widget positioning using rows, columns, and
+                        spanning</li>
+                    <li><strong>Lambda Functions:</strong> Using closures for event binding with parameters</li>
+                    <li><strong>String Manipulation:</strong> Building and modifying expression strings dynamically</li>
+                    <li><strong>Error Handling:</strong> Implementing try-except blocks for robust applications</li>
+                    <li><strong>UI/UX Principles:</strong> Creating intuitive interfaces with visual feedback</li>
+                    <li><strong>Type Conversion:</strong> Managing transitions between string, float, and numeric types
+                    </li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Potential Enhancements</h2>
+                <ul>
+                    <li><strong>Scientific Functions:</strong> Add sin, cos, tan, square root, and exponents</li>
+                    <li><strong>Memory Functions:</strong> Implement M+, M-, MR, MC for memory storage</li>
+                    <li><strong>History Feature:</strong> Display previous calculations in a sidebar</li>
+                    <li><strong>Keyboard Support:</strong> Bind number keys and operators for faster input</li>
+                    <li><strong>Themes:</strong> Multiple color schemes (light/dark mode)</li>
+                    <li><strong>Expression Preview:</strong> Show the full expression above the current input</li>
+                    <li><strong>Copy/Paste:</strong> Clipboard integration for copying results</li>
+                    <li><strong>Percentage Button:</strong> Quick percentage calculations</li>
+                    <li><strong>Parentheses Support:</strong> Allow complex expression grouping</li>
+                    <li><strong>Resizable Window:</strong> Dynamic layout that adapts to window size changes</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Complete Source Code</h2>
+                <div class="code-block">
+                    <pre><code>from tkinter import *
+
+class Calculator:
+
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Calculator")
+        self.root.geometry("615x690+400+200")
+        self.root.configure(bg='cadet blue')
+
+        self.MainFrame = Frame(self.root, bd=18, width=600,
+                              height=670, relief=RIDGE, bg='powder blue')
+        self.MainFrame.grid()
+
+        self.WidgetFrame = Frame(
+            self.MainFrame, bd=18, width=590, height=660,
+            relief=RIDGE, bg='cadet blue')
+        self.WidgetFrame.grid()
+
+        self.lblDisplay = Label(self.WidgetFrame, width=30, height=2,
+                               bg='white', fg='black',
+                               font=('Arial', 20, 'bold'), anchor='e')
+        self.lblDisplay.grid(row=0, column=0, columnspan=4,
+                            padx=10, pady=10)
+
+        self.input_button = " "
+
+        self.create_button("<-", 1, 0)
+        self.create_button("CE", 1, 1)
+        self.create_button("C", 1, 2)
+        self.create_button("+/-", 1, 3)
+
+        self.create_button("7", 2, 0)
+        self.create_button("8", 2, 1)
+        self.create_button("9", 2, 2)
+        self.create_button("+", 2, 3)
+
+        self.create_button("4", 3, 0)
+        self.create_button("5", 3, 1)
+        self.create_button("6", 3, 2)
+        self.create_button("-", 3, 3)
+
+        self.create_button("1", 4, 0)
+        self.create_button("2", 4, 1)
+        self.create_button("3", 4, 2)
+        self.create_button("*", 4, 3)
+
+        self.create_button("0", 5, 0)
+        self.create_button(".", 5, 1)
+        self.create_button("=", 5, 2)
+        self.create_button("/", 5, 3)
+
+    def create_button(self, text, row, column):
+        btnWidget = Button(
+            self.WidgetFrame, text=text, width=6, height=2, bd=4,
+            bg='powder blue', font=('Arial', 20, 'bold'),
+            command=lambda: self.button_click(text))
+        btnWidget.grid(row=row, column=column, padx=5, pady=5)
+
+    def button_click(self, text):
+        if text == "<-":
+            self.input_button = self.input_button[:-1]
+        elif text == "CE":
+            self.input_button = ""
+        elif text == "C":
+            self.input_button = ""
+        elif text == "=":
+            try:
+                self.input_button = str(eval(self.input_button))
+            except:
+                self.input_button = "Error"
+        elif text == "+/-":
+            self.input_button = str(-float(self.input_button))
+        else:
+            self.input_button += text
+        self.lblDisplay.config(text=self.input_button)
+
+root = Tk()
+App = Calculator(root)
+root.mainloop()</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>Technologies Used</h3>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <span class="tech-icon">🐍</span>
+                        <span>Python 3.x</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">🖼️</span>
+                        <span>Tkinter</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">📐</span>
+                        <span>Grid Geometry Manager</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">🎨</span>
+                        <span>Widget Styling</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">⚡</span>
+                        <span>Event Handling</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>GUI Components</h3>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <span>🪟</span>
+                        <span>Tk Window</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>📦</span>
+                        <span>Frame Widgets</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>🏷️</span>
+                        <span>Label Widget</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>🔘</span>
+                        <span>Button Widgets</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Project Links</h3>
+                <a href="#" class="link-button">View on GitHub</a>
+                <a href="#" class="link-button secondary">Download Code</a>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Project Stats</h3>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <span>📊</span>
+                        <span>~80 Lines of Code</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>⏱️</span>
+                        <span>Development: 4 hours</span>
+                    </div>
+                    <div class="tech-item">
+                        <span>🎯</span>
+                        <span>Difficulty: Intermediate</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Related Projects</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 1rem;">
+                        <a href="timed-math-challenge.html" style="color: var(--text-dim); text-decoration: none;">
+                            ⏱️ Timed Math Challenge →
+                        </a>
+                    </li>
+                    <li style="margin-bottom: 1rem;">
+                        <a href="bank-app.html" style="color: var(--text-dim); text-decoration: none;">
+                            🏦 Bank Application →
+                        </a>
+                    </li>
+                    <li>
+                        <a href="quiz-game.html" style="color: var(--text-dim); text-decoration: none;">
+                            ❓ Quiz Game →
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 280;
+        let time = 0;
+
+        class Particle {
+            constructor() {
+                this.baseX = Math.random() * canvas.width;
+                this.baseY = Math.random() * canvas.height;
+                this.x = this.baseX;
+                this.y = this.baseY;
+                this.size = Math.random() * 0.8 + 0.3;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.6 + 0.2;
+                this.offset = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                this.x = this.baseX + Math.sin(time + this.offset) * 30;
+                this.y = this.baseY + Math.cos(time + this.offset) * 30;
+                this.baseX += this.speedX;
+                this.baseY += this.speedY;
+
+                if (this.baseX < -50) this.baseX = canvas.width + 50;
+                if (this.baseX > canvas.width + 50) this.baseX = -50;
+                if (this.baseY < -50) this.baseY = canvas.height + 50;
+                if (this.baseY > canvas.height + 50) this.baseY = -50;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(200, 200, 255, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateBackground() {
+            time += 0.02;
+
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#0a0a0a');
+            gradient.addColorStop(0.5, '#1a1a2e');
+            gradient.addColorStop(1, '#0a0a0a');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animateBackground);
+        }
+
+        animateBackground();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        const cursor = document.querySelector('.cursor');
+        const trails = [];
+        const trailLength = 20;
+
+        for (let i = 0; i < trailLength; i++) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            document.body.appendChild(trail);
+            trails.push({
+                element: trail,
+                x: 0,
+                y: 0
+            });
+        }
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let cursorX = 0;
+        let cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.4;
+            cursorY += (mouseY - cursorY) * 0.4;
+
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+
+            trails.forEach((trail, index) => {
+                const nextTrail = trails[index - 1] || { x: cursorX, y: cursorY };
+
+                trail.x += (nextTrail.x - trail.x) * 0.5;
+                trail.y += (nextTrail.y - trail.y) * 0.5;
+
+                trail.element.style.left = trail.x + 'px';
+                trail.element.style.top = trail.y + 'px';
+                trail.element.style.opacity = (trailLength - index) / trailLength * 0.5;
+                trail.element.style.transform = `scale(${(trailLength - index) / trailLength})`;
+            });
+
+            requestAnimationFrame(animateCursor);
+        }
+
+        animateCursor();
+
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(1.5)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+
+</html>
